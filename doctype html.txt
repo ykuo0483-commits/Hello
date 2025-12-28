@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>智生活科技｜雙網門號 戰情暨暫勤看板</title>
+  <style>
+    :root{
+      /* 明亮色系定義 */
+      --bg:#f1f5f9;          /* 淺灰藍背景 */
+      --panel:#ffffff;       /* 純白面板 */
+      --panel2:#f8fafc;      /* 極淺灰面板 */
+      --text:#334155;        /* 深藍灰文字 */
+      --muted:#64748b;       /* 次要文字 */
+      --line:#e2e8f0;        /* 淺灰框線 */
+      
+      --ok:#10b981;          /* 翠綠 */
+      --warn:#f59e0b;        /* 琥珀 */
+      --bad:#ef4444;         /* 亮紅 */
+      --accent:#3b82f6;      /* 亮藍 */
+      
+      --chip:#f1f5f9;        /* 標籤底色 */
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); /* 柔和陰影 */
+      
+      --r:16px;
+      --r2:12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background: var(--bg);
+      /* 頂部加上一點藍色漸層光暈，增加質感 */
+      background-image: 
+        radial-gradient(800px 400px at 50% 0%, rgba(59, 130, 246, 0.08), transparent 80%);
+      min-height:100vh;
+    }
+    a{color:inherit}
+    .container{max-width:1280px;margin:0 auto;padding:18px 16px 42px}
+    
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background:rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid var(--line);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .topbar .inner{
+      max-width:1280px;margin:0 auto;
+      padding:14px 16px;
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center; min-width:240px;
+    }
+    .logo{
+      width:38px;height:38px;border-radius:12px;
+      background:linear-gradient(135deg, #3b82f6, #06b6d4);
+      box-shadow: 0 4px 10px rgba(59,130,246,0.3);
+    }
+    .brand h1{font-size:15px;margin:0;line-height:1.15;color:#0f172a;font-weight:700}
+    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    
+    .controls{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;
+    }
+    .pill{
+      display:flex; align-items:center; gap:8px;
+      background:#ffffff;
+      border:1px solid var(--line);
+      padding:8px 12px;border-radius:999px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      color:var(--text);
+      transition:.2s;
+    }
+    .pill:hover{border-color:#cbd5e1}
+    .pill label{font-size:12px;color:var(--muted);font-weight:500}
+    
+    select,input{
+      background:transparent;border:none;color:#0f172a;
+      outline:none;font-size:13px;font-weight:600;
+    }
+    select option{background:#ffffff;color:#0f172a}
+    
+    .btn{
+      cursor:pointer;
+      user-select:none;
+      background:#eff6ff; /* 淺藍底 */
+      border:1px solid #bfdbfe;
+      color:#1d4ed8; /* 深藍字 */
+      padding:8px 14px;border-radius:10px;
+      transition:.15s transform, .15s opacity, .15s background;
+      font-size:13px; font-weight:600;
+    }
+    .btn:hover{background:#dbeafe}
+    
+    .btn.secondary{
+      background:#ffffff;
+      border:1px solid var(--line);
+      color:var(--text);
+    }
+    .btn.secondary:hover{background:#f8fafc; border-color:#cbd5e1}
+
+    .badge{
+      font-family:var(--mono);
+      font-size:11px;
+      padding:4px 8px;border-radius:999px;
+      background:#f1f5f9;
+      border:1px solid var(--line);
+      color:var(--muted);
+    }
+
+    .grid{display:grid; gap:14px}
+    .grid.kpi{grid-template-columns:repeat(6, minmax(0, 1fr))}
+    @media (max-width:1100px){ .grid.kpi{grid-template-columns:repeat(3, minmax(0, 1fr))} }
+    @media (max-width:650px){ .grid.kpi{grid-template-columns:repeat(2, minmax(0, 1fr))} }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+      padding:16px 16px 12px;
+      border-bottom:1px solid var(--line);
+      background: #ffffff;
+    }
+    .card .hd h2{margin:0;font-size:15px;letter-spacing:.2px;color:#0f172a;font-weight:700}
+    .card .hd .hint{margin:2px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
+    .card .bd{padding:16px}
+    
+    .kpi-tile{
+      padding:16px;
+      border-radius:var(--r);
+      background:#f8fafc;
+      border:1px solid var(--line);
+      cursor:pointer;
+      transition:.2s all;
+      position:relative;
+      overflow:hidden;
+    }
+    .kpi-tile:hover{
+      transform:translateY(-2px);
+      background:#ffffff;
+      border-color:#bfdbfe;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.1);
+    }
+    .kpi-name{font-size:13px;color:var(--muted);font-weight:500}
+    .kpi-val{font-size:24px;margin-top:6px;font-family:var(--mono);color:#0f172a;font-weight:700}
+    .kpi-sub{font-size:12px;color:#94a3b8;margin-top:4px}
+    
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .row > *{flex:1}
+    .split{display:grid;grid-template-columns: 1.1fr 1fr; gap:16px}
+    @media (max-width:1000px){ .split{grid-template-columns:1fr} }
+    
+    .mini{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      padding:12px 14px;border-radius:12px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      margin-bottom:10px;
+    }
+    .mini .t{font-size:13px;color:var(--text)}
+    .mini .v{font-family:var(--mono);font-size:15px;font-weight:600;color:#0f172a}
+    
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{
+      padding:6px 10px;border-radius:999px;
+      background:#f1f5f9;
+      border:1px solid var(--line);
+      font-size:12px;color:var(--text);
+    }
+    .chip strong{color:#0f172a;font-family:var(--mono);font-weight:600}
+    /* 讓ABC等級標籤更鮮明一點 */
+    .chip.a{background:#ecfdf5; border-color:#a7f3d0; color:#065f46} /* 綠底 */
+    .chip.b{background:#fffbeb; border-color:#fde68a; color:#92400e} /* 黃底 */
+    .chip.c{background:#fef2f2; border-color:#fecaca; color:#991b1b} /* 紅底 */
+    
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#ffffff;
+    }
+    .table th, .table td{
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      font-size:13px;
+      text-align:left;
+      vertical-align:middle;
+    }
+    .table th{
+      color:var(--muted);
+      font-weight:600;
+      background:#f8fafc;
+      position:sticky; top:0;
+      z-index:1;
+      border-bottom: 1px solid #cbd5e1; /* 標題線稍微深一點 */
+    }
+    .table tr:last-child td{border-bottom:none}
+    .table tr:hover td{background:#f8fafc}
+
+    .tag{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 8px;border-radius:999px;
+      font-family:var(--mono);
+      font-size:11px; font-weight:600;
+      border:1px solid transparent;
+    }
+    .tag.A{background:#d1fae5; color:#065f46; border-color:#a7f3d0}
+    .tag.B{background:#fef3c7; color:#92400e; border-color:#fde68a}
+    .tag.C{background:#fee2e2; color:#991b1b; border-color:#fecaca}
+    
+    .actions{display:flex; gap:8px; flex-wrap:wrap}
+    .smallbtn{
+      padding:6px 10px;border-radius:8px;
+      background:#ffffff;
+      border:1px solid var(--line);
+      color:var(--text); font-size:12px; font-weight:500;
+      cursor:pointer;
+      transition:.2s;
+    }
+    .smallbtn:hover{background:#f1f5f9; border-color:#cbd5e1}
+    .smallbtn.primary{border-color:#bfdbfe; color:#1d4ed8; background:#eff6ff}
+    .smallbtn.primary:hover{background:#dbeafe}
+    .smallbtn.ok{border-color:#a7f3d0; color:#059669; background:#ecfdf5}
+    .smallbtn.ok:hover{background:#d1fae5}
+
+    .muted{color:var(--muted)}
+    .warn{color:#d97706}
+    .bad{color:#dc2626}
+    .ok{color:#059669}
+    
+    .footer{
+      margin-top:16px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+    .hidden{display:none !important}
+    .hr{height:1px;background:var(--line);margin:16px 0}
+    .right{ text-align:right }
+    .mono{ font-family:var(--mono) }
+    
+    /* 點擊關注效果 */
+    @keyframes pulse-light {
+      0% { background-color: #fff; }
+      50% { background-color: #e0f2fe; }
+      100% { background-color: #fff; }
+    }
+    .pulse { animation: pulse-light 0.8s ease-in-out; }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>雙網門號｜戰情暨暫勤看板</h1>
+          <div class="sub">智生活科技｜電銷業務部</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="pill">
+          <label>角色</label>
+          <select id="roleSel">
+            <option value="sales">業務視角</option>
+            <option value="manager">主管視角</option>
+          </select>
+        </div>
+
+        <div class="pill" id="salesUserPill">
+          <label>業務</label>
+          <select id="repSel"></select>
+        </div>
+
+        <div class="pill">
+          <label>名單等級</label>
+          <select id="gradeFilter">
+            <option value="ALL">全部</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+
+        <div class="pill">
+          <label>名單來源</label>
+          <select id="sourceFilter">
+            <option value="ALL">全部</option>
+            <option value="線下來單">線下來單</option>
+            <option value="老客續約">老客續約</option>
+            <option value="新客">新客</option>
+            <option value="活動">活動</option>
+          </select>
+        </div>
+
+        <div class="pill">
+          <label>狀態</label>
+          <select id="statusFilter">
+            <option value="ALL">全部</option>
+            <option value="未撥打">未撥打</option>
+            <option value="已撥打">已撥打</option>
+            <option value="跟進中">跟進中</option>
+            <option value="成交">成交</option>
+            <option value="無效">無效</option>
+          </select>
+        </div>
+
+        <div class="pill">
+          <label>搜尋</label>
+          <input id="searchBox" placeholder="名單ID / 客戶代碼" />
+        </div>
+
+        <button class="btn secondary" id="resetBtn">清除篩選</button>
+        <span class="badge" id="updatedAt"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- ABC 規則 -->
+    <div class="card" id="ruleCard">
+      <div class="hd">
+        <div>
+          <h2>ABC 名單分級規則（系統自動判斷）</h2>
+          <div class="hint">此規則為本看板所有排序、KPI、暫勤清單與排行的共同基準。</div>
+        </div>
+        <button class="btn secondary" id="toggleRules">收合/展開</button>
+      </div>
+      <div class="bd" id="rulesBody">
+        <div class="chips">
+          <div class="chip a">
+            <strong>A</strong>｜資費<strong>599(含)以上</strong>，且符合任一：<strong>無合約（線下來單）</strong>／<strong>3個月內到期</strong>／<strong>3～6個月內到期</strong>
+            ｜定位：高成交/可提前鋪陳｜建議：優先撥打、密集跟進、方案預熱
+          </div>
+          <div class="chip b">
+            <strong>B</strong>｜<strong>799(含)以上</strong>且<strong>6個月內到期</strong>；或<strong>999(含)以上</strong>且<strong>6個月以上</strong>
+            ｜定位：中期可談｜建議：降月費切入、長約換低資費
+          </div>
+          <div class="chip c">
+            <strong>C</strong>｜<strong>599以下</strong>且<strong>到期日不清楚</strong>
+            ｜定位：低優先｜建議：名單養成、被動追蹤、不列主動重銷
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <!-- KPI -->
+    <div class="card">
+      <div class="hd">
+        <div>
+          <h2 id="kpiTitle">核心 KPI 快速總覽</h2>
+          <div class="hint" id="kpiHint">點擊任一 KPI 會自動套用篩選並下鑽到明細。</div>
+        </div>
+        <span class="badge" id="scopeBadge"></span>
+      </div>
+      <div class="bd">
+        <div class="grid kpi" id="kpiGrid"></div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <!-- 主內容：業務（暫勤/今日） & 主管（來源×ABC、風險） -->
+    <div class="split">
+      <!-- 左：業務暫勤 / 主管來源矩陣 -->
+      <div class="card" id="leftPrimaryCard">
+        <div class="hd">
+          <div>
+            <h2 id="leftTitle">今日暫勤 / 行動核心區</h2>
+            <div class="hint" id="leftHint">系統依名單等級與逾期優先排序，直接指引今日優先撥打對象。</div>
+          </div>
+          <span class="badge" id="leftBadge"></span>
+        </div>
+        <div class="bd" id="leftBody">
+          <!-- Injected -->
+        </div>
+      </div>
+
+      <!-- 右：名單結構 / 主管積壓 -->
+      <div class="card" id="rightPrimaryCard">
+        <div class="hd">
+          <div>
+            <h2 id="rightTitle">名單品質結構</h2>
+            <div class="hint" id="rightHint">以名單結構解釋成果差異，並支援下鑽到明細。</div>
+          </div>
+          <span class="badge" id="rightBadge"></span>
+        </div>
+        <div class="bd" id="rightBody">
+          <!-- Injected -->
+        </div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <!-- 排行榜 -->
+    <div class="card">
+      <div class="hd">
+        <div>
+          <h2 id="rankTitle">排行榜</h2>
+          <div class="hint">透明化：成交、營收、轉換率、逾期等指標一眼掌握。</div>
+        </div>
+        <div class="row" style="max-width:460px">
+          <button class="btn secondary" id="rankTab1">成交數</button>
+          <button class="btn secondary" id="rankTab2">營收</button>
+          <button class="btn secondary" id="rankTab3">轉換率</button>
+          <button class="btn secondary" id="rankTab4">逾期最少</button>
+        </div>
+      </div>
+      <div class="bd" id="rankBody"></div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <!-- 明細表 -->
+    <div class="card">
+      <div class="hd">
+        <div>
+          <h2 id="tableTitle">名單明細表（可搜尋 / 可篩選 / 可下鑽）</h2>
+          <div class="hint">此為本頁的決策底層資料。所有 KPI 與圖表皆由此彙總。</div>
+        </div>
+        <span class="badge" id="tableBadge"></span>
+      </div>
+      <div class="bd">
+        <div style="overflow:auto; max-height:520px">
+          <table class="table" id="leadTable">
+            <thead>
+              <tr>
+                <th>名單ID</th>
+                <th>客戶代碼</th>
+                <th>業務</th>
+                <th>來源</th>
+                <th>等級</th>
+                <th class="right">資費</th>
+                <th>合約到期狀態</th>
+                <th>狀態</th>
+                <th>最後撥打</th>
+                <th class="right">逾期天數</th>
+                <th class="right">撥打次數</th>
+                <th class="right">營收</th>
+                <th>下一步 / 備註</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="leadTbody"></tbody>
+          </table>
+        </div>
+
+        <div class="footer">
+          <div>資料來源：模擬資料（5 位業務）｜更新頻率：即時（前端計算）</div>
+          <div>逾期定義：距離最後撥打日 > 3 天（業務視角 KPI）｜主管視角另含 >2 / >7 監控。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/** =========================
+ * 模擬資料：5 位業務 + 名單
+ * ========================= */
+
+// 以固定日期模擬「今天」
+const TODAY = new Date("2025-12-27T09:00:00+08:00");
+
+const REPS = [
+  { id:"R001", name:"業務A-詠晴", monthlyTargetRevenue: 180000, monthlyTargetDeals: 38 },
+  { id:"R002", name:"業務B-昱辰", monthlyTargetRevenue: 160000, monthlyTargetDeals: 34 },
+  { id:"R003", name:"業務C-思妤", monthlyTargetRevenue: 200000, monthlyTargetDeals: 42 },
+  { id:"R004", name:"業務D-冠廷", monthlyTargetRevenue: 150000, monthlyTargetDeals: 30 },
+  { id:"R005", name:"業務E-品蓁", monthlyTargetRevenue: 170000, monthlyTargetDeals: 36 },
+];
+
+const SOURCES = ["線下來單", "老客續約", "新客", "活動"];
+const STATUS = ["未撥打", "已撥打", "跟進中", "成交", "無效"];
+const CONTRACT = [
+  "無合約",
+  "3個月內到期",
+  "3～6個月內到期",
+  "6個月內到期",
+  "6個月以上",
+  "不清楚合約到期日"
+];
+
+// 產生可控的隨機（可重現）
+let seed = 42;
+function rand(){
+  seed = (seed * 1664525 + 1013904223) % 4294967296;
+  return seed / 4294967296;
+}
+function pick(arr){ return arr[Math.floor(rand()*arr.length)] }
+function pad(n){ return String(n).padStart(2,"0") }
+function fmtDate(d){
+  if(!d) return "—";
+  const dt = new Date(d);
+  return `${dt.getFullYear()}/${pad(dt.getMonth()+1)}/${pad(dt.getDate())}`;
+}
+function daysBetween(d1, d2){
+  const a = new Date(d1).setHours(0,0,0,0);
+  const b = new Date(d2).setHours(0,0,0,0);
+  return Math.round((a-b)/(24*3600*1000));
+}
+
+// 名單分級規則（依你最新圖片）
+function gradeLead(lead){
+  const fee = lead.fee;
+  const contract = lead.contract;
+  const source = lead.source;
+
+  // A：599(含)以上 + (無合約線下來單) / 3個月內 / 3~6個月內
+  const a1 = fee >= 599 && contract === "無合約" && source === "線下來單";
+  const a2 = fee >= 599 && contract === "3個月內到期";
+  const a3 = fee >= 599 && contract === "3～6個月內到期";
+  if(a1 || a2 || a3) return "A";
+
+  // B：799(含)以上 + 6個月內到期
+  const b1 = fee >= 799 && contract === "6個月內到期";
+  // B：999(含)以上 + 6個月以上
+  const b2 = fee >= 999 && contract === "6個月以上";
+  if(b1 || b2) return "B";
+
+  // C：599以下 + 到期日不清楚
+  const c = fee < 599 && contract === "不清楚合約到期日";
+  if(c) return "C";
+
+  // 不符合任何規則：保守歸類 C（避免誤判為高優先）
+  return "C";
+}
+
+function recommendByGrade(lead){
+  const g = lead.grade;
+  if(g === "A"){
+    if(lead.contract === "無合約") return "優先撥打、重點追蹤";
+    if(lead.contract === "3個月內到期") return "主力名單、密集跟進";
+    if(lead.contract === "3～6個月內到期") return "方案預熱、持續追蹤";
+    return "優先處理";
+  }
+  if(g === "B"){
+    if(lead.fee >= 999 && lead.contract === "6個月以上") return "長約換低資費";
+    return "以降月費切入";
+  }
+  return "名單養成、被動追蹤";
+}
+
+function calcRevenue(lead){
+  // 模擬：成交才有營收；雙網門號營收用簡化模型（一次性 + 月租系數）
+  if(lead.status !== "成交") return 0;
+  const base = 1200 + Math.round(lead.fee * 0.8);
+  const bonus = (lead.grade === "A") ? 800 : (lead.grade === "B") ? 500 : 200;
+  return base + bonus;
+}
+
+// 產生名單（每位業務 18 筆）
+const LEADS = [];
+let leadNo = 1001;
+for(const rep of REPS){
+  for(let i=0;i<18;i++){
+    const source = pick(SOURCES);
+
+    // 資費分布：偏向 599/799/999/1399
+    const feeCandidates = [399, 499, 599, 699, 799, 899, 999, 1199, 1399];
+    const fee = pick(feeCandidates);
+
+    // 合約狀態：讓規則有一定命中率
+    let contract = pick(CONTRACT);
+    // 提高線下來單出現無合約機率
+    if(source === "線下來單" && rand() < 0.55) contract = "無合約";
+    // 提高 599+ 出現到期區間機率
+    if(fee >= 599 && rand() < 0.40) contract = pick(["3個月內到期","3～6個月內到期","6個月內到期","6個月以上"]);
+    // 提高低資費出現不清楚
+    if(fee < 599 && rand() < 0.55) contract = "不清楚合約到期日";
+
+    let status = pick(STATUS);
+    // 讓成交比例合理
+    if(rand() < 0.20) status = "成交";
+    if(rand() < 0.08) status = "無效";
+
+    // 最後撥打：未撥打 => null；其他 => 0~10天前
+    let lastCall = null;
+    let callCount = 0;
+    if(status !== "未撥打"){
+      const ago = Math.floor(rand()*11); // 0..10
+      const d = new Date(TODAY);
+      d.setDate(d.getDate() - ago);
+      lastCall = d.toISOString();
+      callCount = 1 + Math.floor(rand()*5);
+    }
+
+    const lead = {
+      id: `L${leadNo++}`,
+      customerCode: `C${Math.floor(100000 + rand()*899999)}`,
+      repId: rep.id,
+      repName: rep.name,
+      source,
+      fee,
+      contract,
+      status,
+      lastCall,
+      callCount,
+      nextStep: (status==="成交") ? "—" : (status==="無效") ? "—" : (rand()<0.5 ? "安排回撥" : "補充方案說明"),
+      note: (rand()<0.25) ? "需確認到期日" : "",
+    };
+    lead.grade = gradeLead(lead);
+    lead.recommend = recommendByGrade(lead);
+    lead.revenue = calcRevenue(lead);
+    LEADS.push(lead);
+  }
+}
+
+/** =========================
+ * 狀態：篩選/角色/排行
+ * ========================= */
+const state = {
+  role: "sales",
+  repId: REPS[0].id,
+  grade: "ALL",
+  source: "ALL",
+  status: "ALL",
+  q: "",
+  rankMode: "deals"
+};
+
+const $ = (id)=>document.getElementById(id);
+
+function setUpdatedAt(){
+  const t = new Date(TODAY);
+  $("updatedAt").textContent = `更新時間 ${t.getFullYear()}/${pad(t.getMonth()+1)}/${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())}`;
+}
+
+function initControls(){
+  const repSel = $("repSel");
+  repSel.innerHTML = REPS.map(r=>`<option value="${r.id}">${r.name}</option>`).join("");
+  repSel.value = state.repId;
+
+  $("roleSel").addEventListener("change",(e)=>{
+    state.role = e.target.value;
+    render();
+  });
+  repSel.addEventListener("change",(e)=>{
+    state.repId = e.target.value;
+    render();
+  });
+  $("gradeFilter").addEventListener("change",(e)=>{ state.grade = e.target.value; renderTableAndBadges(); renderKPI(); renderLeftRight(); });
+  $("sourceFilter").addEventListener("change",(e)=>{ state.source = e.target.value; renderTableAndBadges(); renderKPI(); renderLeftRight(); });
+  $("statusFilter").addEventListener("change",(e)=>{ state.status = e.target.value; renderTableAndBadges(); renderKPI(); renderLeftRight(); });
+  $("searchBox").addEventListener("input",(e)=>{ state.q = e.target.value.trim(); renderTableAndBadges(); });
+
+  $("resetBtn").addEventListener("click",()=>{
+    state.grade="ALL"; state.source="ALL"; state.status="ALL"; state.q="";
+    $("gradeFilter").value="ALL";
+    $("sourceFilter").value="ALL";
+    $("statusFilter").value="ALL";
+    $("searchBox").value="";
+    renderTableAndBadges(); renderKPI(); renderLeftRight();
+  });
+
+  $("toggleRules").addEventListener("click",()=>{
+    $("rulesBody").classList.toggle("hidden");
+  });
+
+  $("rankTab1").addEventListener("click",()=>{ state.rankMode="deals"; renderRank(); });
+  $("rankTab2").addEventListener("click",()=>{ state.rankMode="revenue"; renderRank(); });
+  $("rankTab3").addEventListener("click",()=>{ state.rankMode="cr"; renderRank(); });
+  $("rankTab4").addEventListener("click",()=>{ state.rankMode="overdue"; renderRank(); });
+}
+
+function applyScope(leads){
+  // role scope: sales -> only my leads; manager -> all
+  if(state.role === "sales") return leads.filter(l=>l.repId===state.repId);
+  return leads.slice();
+}
+function applyFilters(leads){
+  return leads.filter(l=>{
+    if(state.grade!=="ALL" && l.grade!==state.grade) return false;
+    if(state.source!=="ALL" && l.source!==state.source) return false;
+    if(state.status!=="ALL" && l.status!==state.status) return false;
+    if(state.q){
+      const q = state.q.toLowerCase();
+      if(!(`${l.id}`.toLowerCase().includes(q) || `${l.customerCode}`.toLowerCase().includes(q))) return false;
+    }
+    return true;
+  });
+}
+
+function overdueDays(lead){
+  if(!lead.lastCall) return null; // 未撥打
+  return daysBetween(TODAY, lead.lastCall);
+}
+function isOverdue(lead, n){
+  // 超過 n 天未撥打：lastCall 存在且 days > n
+  const d = overdueDays(lead);
+  if(d===null) return false;
+  return d > n;
+}
+
+/** =========================
+ * KPI 計算
+ * ========================= */
+function calcKPIs(scoped){
+  const total = scoped.length;
+  const called = scoped.filter(l=>l.status!=="未撥打").length;
+  const uncalled = scoped.filter(l=>l.status==="未撥打").length;
+  const overdue3 = scoped.filter(l=>isOverdue(l,3)).length;
+
+  const deals = scoped.filter(l=>l.status==="成交").length;
+  const revenue = scoped.reduce((s,l)=>s+l.revenue,0);
+
+  // manager extras
+  const overdue2 = scoped.filter(l=>isOverdue(l,2)).length;
+  const overdue7 = scoped.filter(l=>isOverdue(l,7)).length;
+  const validTouched = scoped.filter(l=>["已撥打","跟進中","成交"].includes(l.status)).length;
+  const conversion = validTouched ? (deals/validTouched) : 0;
+
+  return { total, called, uncalled, overdue3, deals, revenue, overdue2, overdue7, conversion };
+}
+
+function percent(n){ return (n*100).toFixed(1)+"%"; }
+function money(n){
+  return n.toLocaleString("zh-Hant-TW",{maximumFractionDigits:0});
+}
+
+function renderKPI(){
+  const scoped = applyScope(LEADS);
+  const filtered = applyFilters(scoped); // KPI 以篩選後範圍顯示（更一致）
+  const k = calcKPIs(filtered);
+
+  $("kpiTitle").textContent = (state.role==="sales") ? "個人 KPI 快速總覽" : "團隊 KPI 快速總覽";
+  $("scopeBadge").textContent = (state.role==="sales")
+    ? `範圍：${REPS.find(r=>r.id===state.repId).name}（套用篩選後）`
+    : `範圍：全隊（套用篩選後）`;
+
+  const tiles = (state.role==="sales") ? [
+    { key:"total",  name:"名單總數",     val:k.total, sub:"本範圍名單量" },
+    { key:"called", name:"已撥打數",     val:k.called, sub:"狀態≠未撥打" },
+    { key:"uncalled",name:"未撥打數",    val:k.uncalled, sub:"需排入今日" },
+    { key:"overdue3",name:"逾期名單（>3天）", val:k.overdue3, sub:"需優先處理" },
+    { key:"deals",  name:"本月成交門號數", val:k.deals, sub:"狀態=成交" },
+    { key:"revenue",name:"本月營收",     val:"$"+money(k.revenue), sub:"模擬計算" },
+  ] : [
+    { key:"total",  name:"團隊名單總量",     val:k.total, sub:"本範圍名單量" },
+    { key:"called", name:"團隊撥打完成率",   val: (k.total? percent(k.called/k.total):"0.0%"), sub:`已撥打 ${k.called}/${k.total}` },
+    { key:"overdue2",name:"逾期（>2天）",    val:k.overdue2, sub:"需介入監控" },
+    { key:"overdue3",name:"逾期（>3天）",    val:k.overdue3, sub:"高風險積壓" },
+    { key:"overdue7",name:"逾期（>7天）",    val:k.overdue7, sub:"立即處置" },
+    { key:"conversion",name:"轉換率（成交/有效觸及）", val:percent(k.conversion), sub:"有效觸及=已撥打/跟進中/成交" },
+  ];
+
+  const grid = $("kpiGrid");
+  grid.innerHTML = tiles.map(t=>`
+    <div class="kpi-tile" data-kpi="${t.key}">
+      <div class="kpi-name">${t.name}</div>
+      <div class="kpi-val">${t.val}</div>
+      <div class="kpi-sub">${t.sub}</div>
+    </div>
+  `).join("");
+
+  // KPI 點擊 => 套用快篩（示例：逾期/狀態）
+  [...grid.querySelectorAll(".kpi-tile")].forEach(el=>{
+    el.addEventListener("click",()=>{
+      const kpi = el.getAttribute("data-kpi");
+      if(kpi==="overdue3"){
+        // 直接把狀態切到「已撥打/跟進中」不做，改以搜尋/篩選提示：這裡示範將 status=ALL 並用 grade=ALL，不變；但 table 將高亮逾期
+        // 讓使用者仍保留目前篩選，僅滾動到表格
+      }
+      document.getElementById("leadTable").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+/** =========================
+ * 左右主卡渲染（角色不同）
+ * ========================= */
+function renderLeftRight(){
+  const left = $("leftBody");
+  const right = $("rightBody");
+
+  if(state.role==="sales"){
+    $("salesUserPill").classList.remove("hidden");
+    $("leftTitle").textContent = "今日暫勤 / 行動核心區";
+    $("leftHint").textContent = "系統依名單等級與逾期優先排序，直接指引今日優先撥打對象。";
+    $("rightTitle").textContent = "名單品質結構（個人）";
+    $("rightHint").textContent = "以名單結構解釋成果差異，並支援下鑽到明細。";
+
+    const repLeads = applyFilters(LEADS.filter(l=>l.repId===state.repId));
+    const todayPlan = buildTodayPlan(repLeads);
+    $("leftBadge").textContent = `今日建議撥打：${todayPlan.todo}｜剩餘：${todayPlan.remaining}`;
+    left.innerHTML = renderSalesTodayPanel(todayPlan);
+
+    const structure = buildStructure(repLeads);
+    $("rightBadge").textContent = `A:${structure.A} B:${structure.B} C:${structure.C}`;
+    right.innerHTML = renderSalesStructure(structure);
+
+  }else{
+    $("salesUserPill").classList.add("hidden");
+    $("leftTitle").textContent = "名單來源 × ABC 結構（全隊）";
+    $("leftHint").textContent = "用來源與等級結構，快速判斷名單品質、執行進度與轉換效率。";
+    $("rightTitle").textContent = "名單老化 / 積壓風險（全隊）";
+    $("rightHint").textContent = "以逾期區間監控積壓與紀律，支援依業務排序。";
+
+    const team = applyFilters(LEADS);
+    $("leftBadge").textContent = `來源數：${new Set(team.map(x=>x.source)).size}｜名單：${team.length}`;
+    left.innerHTML = renderManagerSourceMatrix(team);
+
+    $("rightBadge").textContent = `>2天:${team.filter(l=>isOverdue(l,2)).length} >3天:${team.filter(l=>isOverdue(l,3)).length} >7天:${team.filter(l=>isOverdue(l,7)).length}`;
+    right.innerHTML = renderManagerOverdue(team);
+  }
+}
+
+function buildTodayPlan(repLeads){
+  // 今日建議：優先挑「未撥打」+「已撥打但逾期」；排序：A(無合約) > A(3m) > A(3-6m) > B > C；同等級再看逾期天數大到小
+  const actionable = repLeads
+    .filter(l=> l.status!=="成交" && l.status!=="無效")
+    .map(l=>({
+      ...l,
+      od: (l.status==="未撥打") ? 999 : overdueDays(l), // 未撥打視為最高優先
+      priority: calcPriority(l)
+    }))
+    .sort((a,b)=> (a.priority-b.priority) || (b.od-a.od) || (b.fee-a.fee));
+
+  const todo = actionable.length;
+  const doneToday = repLeads.filter(l=>{
+    if(!l.lastCall) return false;
+    const d = new Date(l.lastCall);
+    return d.toDateString() === TODAY.toDateString();
+  }).length;
+
+  return {
+    todo,
+    doneToday,
+    remaining: Math.max(todo - doneToday, 0),
+    overdueNeed: repLeads.filter(l=>isOverdue(l,3)).length,
+    topList: actionable.slice(0, 10)
+  };
+}
+
+function calcPriority(l){
+  // 1 best
+  if(l.grade==="A" && l.contract==="無合約") return 1;
+  if(l.grade==="A" && l.contract==="3個月內到期") return 2;
+  if(l.grade==="A" && l.contract==="3～6個月內到期") return 3;
+  if(l.grade==="B") return 4;
+  return 5;
+}
+
+function renderSalesTodayPanel(plan){
+  return `
+    <div class="mini"><div class="t">今日建議撥打</div><div class="v">${plan.todo}</div></div>
+    <div class="mini"><div class="t">今日已完成撥打</div><div class="v">${plan.doneToday}</div></div>
+    <div class="mini"><div class="t">今日剩餘</div><div class="v">${plan.remaining}</div></div>
+    <div class="mini"><div class="t">逾期名單（>3天）</div><div class="v ${plan.overdueNeed? "warn":"muted"}">${plan.overdueNeed}</div></div>
+
+    <div class="hr"></div>
+    <div class="muted" style="font-size:12px;margin-bottom:10px">今日優先撥打清單（Top 10）</div>
+
+    <div style="overflow:auto; max-height:360px">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>客戶代碼</th>
+            <th>等級</th>
+            <th class="right">資費</th>
+            <th>來源</th>
+            <th>合約</th>
+            <th>最後撥打</th>
+            <th class="right">逾期</th>
+            <th>建議</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${plan.topList.map(l=>{
+            const od = (l.status==="未撥打") ? "未撥打" : `${l.od}天`;
+            const odClass = (l.status==="未撥打") ? "bad" : (l.od>3? "warn":"muted");
+            return `
+              <tr>
+                <td class="mono">${l.customerCode}</td>
+                <td><span class="tag ${l.grade}">${l.grade}</span></td>
+                <td class="right mono">${l.fee}</td>
+                <td>${l.source}</td>
+                <td>${l.contract}</td>
+                <td>${fmtDate(l.lastCall)}</td>
+                <td class="right ${odClass} mono">${od}</td>
+                <td>${l.recommend}</td>
+                <td class="actions">
+                  <button class="smallbtn primary" onclick="scrollToLead('${l.id}')">查看</button>
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function buildStructure(leads){
+  const A = leads.filter(l=>l.grade==="A").length;
+  const B = leads.filter(l=>l.grade==="B").length;
+  const C = leads.filter(l=>l.grade==="C").length;
+  const bySource = {};
+  for(const s of SOURCES) bySource[s]=0;
+  for(const l of leads) bySource[l.source]=(bySource[l.source]||0)+1;
+
+  const byGradeDetail = {
+    "A-無合約": leads.filter(l=>l.grade==="A" && l.contract==="無合約").length,
+    "A-3個月內": leads.filter(l=>l.grade==="A" && l.contract==="3個月內到期").length,
+    "A-3~6個月": leads.filter(l=>l.grade==="A" && l.contract==="3～6個月內到期").length,
+    "B-6個月內": leads.filter(l=>l.grade==="B" && l.contract==="6個月內到期").length,
+    "B-6個月以上": leads.filter(l=>l.grade==="B" && l.contract==="6個月以上").length,
+    "C-低優先": leads.filter(l=>l.grade==="C").length,
+  };
+
+  return { A,B,C, total:leads.length, bySource, byGradeDetail };
+}
+
+function renderSalesStructure(st){
+  const pct = (n)=> st.total? percent(n/st.total):"0.0%";
+  return `
+    <div class="row">
+      <div class="mini"><div class="t">A 級</div><div class="v ok">${st.A} <span class="muted">(${pct(st.A)})</span></div></div>
+      <div class="mini"><div class="t">B 級</div><div class="v warn">${st.B} <span class="muted">(${pct(st.B)})</span></div></div>
+      <div class="mini"><div class="t">C 級</div><div class="v bad">${st.C} <span class="muted">(${pct(st.C)})</span></div></div>
+    </div>
+
+    <div class="hr"></div>
+    <div class="muted" style="font-size:12px;margin-bottom:8px">A/B 細分（用於暫勤優先順序）</div>
+    <div class="chips">
+      ${Object.entries(st.byGradeDetail).map(([k,v])=>`
+        <span class="chip ${k.startsWith("A")?"a":k.startsWith("B")?"b":"c"}">${k}：<strong>${v}</strong></span>
+      `).join("")}
+    </div>
+
+    <div class="hr"></div>
+    <div class="muted" style="font-size:12px;margin-bottom:8px">名單來源占比</div>
+    <div class="chips">
+      ${Object.entries(st.bySource).map(([k,v])=>`
+        <span class="chip">${k}：<strong>${v}</strong> <span class="muted">(${pct(v)})</span></span>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderManagerSourceMatrix(team){
+  // 來源 × ABC 結構 + 撥打完成率 + 轉換率
+  const rows = SOURCES.map(src=>{
+    const leads = team.filter(l=>l.source===src);
+    const total = leads.length;
+    const A = leads.filter(l=>l.grade==="A").length;
+    const B = leads.filter(l=>l.grade==="B").length;
+    const C = leads.filter(l=>l.grade==="C").length;
+
+    const called = leads.filter(l=>l.status!=="未撥打").length;
+    const calledRate = total? called/total : 0;
+
+    const touched = leads.filter(l=>["已撥打","跟進中","成交"].includes(l.status)).length;
+    const deals = leads.filter(l=>l.status==="成交").length;
+    const cr = touched? deals/touched : 0;
+
+    return {src,total,A,B,C,called,calledRate,deals,cr};
+  });
+
+  return `
+    <div style="overflow:auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>來源</th>
+            <th class="right">名單量</th>
+            <th class="right">A</th>
+            <th class="right">B</th>
+            <th class="right">C</th>
+            <th class="right">撥打完成率</th>
+            <th class="right">成交數</th>
+            <th class="right">轉換率</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r=>`
+            <tr>
+              <td><span class="tag">${r.src}</span></td>
+              <td class="right mono">${r.total}</td>
+              <td class="right mono ok">${r.A}</td>
+              <td class="right mono warn">${r.B}</td>
+              <td class="right mono bad">${r.C}</td>
+              <td class="right mono">${percent(r.calledRate)}</td>
+              <td class="right mono">${r.deals}</td>
+              <td class="right mono">${percent(r.cr)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hr"></div>
+    <div class="muted" style="font-size:12px">
+      使用方式：A 比例偏低或 C 過高 → 名單品質/來源需調整；撥打完成率低 → 行為節奏需介入；轉換率低 → 話術/方案/名單匹配需修正。
+    </div>
+  `;
+}
+
+function renderManagerOverdue(team){
+  const perRep = REPS.map(r=>{
+    const leads = team.filter(l=>l.repId===r.id);
+    const total = leads.length;
+    const uncalled = leads.filter(l=>l.status==="未撥打").length;
+    const od2 = leads.filter(l=>isOverdue(l,2)).length;
+    const od3 = leads.filter(l=>isOverdue(l,3)).length;
+    const od7 = leads.filter(l=>isOverdue(l,7)).length;
+    const called = leads.filter(l=>l.status!=="未撥打").length;
+    const rate = total? called/total : 0;
+    return {name:r.name,total,uncalled,od2,od3,od7,rate};
+  }).sort((a,b)=> b.od3-a.od3 || b.uncalled-a.uncalled);
+
+  return `
+    <div style="overflow:auto; max-height:430px">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>業務</th>
+            <th class="right">名單量</th>
+            <th class="right">未撥打</th>
+            <th class="right">>2天</th>
+            <th class="right">>3天</th>
+            <th class="right">>7天</th>
+            <th class="right">完成率</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${perRep.map(r=>`
+            <tr>
+              <td>${r.name}</td>
+              <td class="right mono">${r.total}</td>
+              <td class="right mono ${r.uncalled? "warn":"muted"}">${r.uncalled}</td>
+              <td class="right mono ${r.od2? "warn":"muted"}">${r.od2}</td>
+              <td class="right mono ${r.od3? "bad":"muted"}">${r.od3}</td>
+              <td class="right mono ${r.od7? "bad":"muted"}">${r.od7}</td>
+              <td class="right mono">${percent(r.rate)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hr"></div>
+    <div class="muted" style="font-size:12px">
+      主管建議：>3天 為高風險積壓；>7天 建議立即處置（名單重分配/輔導/節奏調整）。
+    </div>
+  `;
+}
+
+/** =========================
+ * 排行榜
+ * ========================= */
+function renderRank(){
+  const team = applyFilters(LEADS); // 排行跟著篩選
+  const reps = REPS.map(r=>{
+    const leads = team.filter(l=>l.repId===r.id);
+    const touched = leads.filter(l=>["已撥打","跟進中","成交"].includes(l.status)).length;
+    const deals = leads.filter(l=>l.status==="成交").length;
+    const revenue = leads.reduce((s,l)=>s+l.revenue,0);
+    const cr = touched? deals/touched : 0;
+    const od3 = leads.filter(l=>isOverdue(l,3)).length;
+    return {name:r.name, deals, revenue, cr, od3, touched, total:leads.length};
+  });
+
+  let title = "";
+  let sorted = [];
+  if(state.rankMode==="deals"){
+    title = "成交數排行";
+    sorted = reps.sort((a,b)=> b.deals-a.deals || b.revenue-a.revenue);
+  }else if(state.rankMode==="revenue"){
+    title = "營收排行";
+    sorted = reps.sort((a,b)=> b.revenue-a.revenue || b.deals-a.deals);
+  }else if(state.rankMode==="cr"){
+    title = "轉換率排行（成交 / 有效觸及）";
+    sorted = reps.sort((a,b)=> b.cr-a.cr || b.deals-a.deals);
+  }else{
+    title = "逾期最少排行（>3天）";
+    sorted = reps.sort((a,b)=> a.od3-b.od3 || b.deals-a.deals);
+  }
+
+  $("rankTitle").textContent = `排行榜｜${title}`;
+  $("rankBody").innerHTML = `
+    <div style="overflow:auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="right">名次</th>
+            <th>業務</th>
+            <th class="right">成交</th>
+            <th class="right">營收</th>
+            <th class="right">轉換率</th>
+            <th class="right">逾期(>3天)</th>
+            <th class="right">有效觸及</th>
+            <th class="right">名單量</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map((r,idx)=>`
+            <tr>
+              <td class="right mono">${idx+1}</td>
+              <td>${r.name}</td>
+              <td class="right mono">${r.deals}</td>
+              <td class="right mono">$${money(r.revenue)}</td>
+              <td class="right mono">${percent(r.cr)}</td>
+              <td class="right mono ${r.od3? "warn":"muted"}">${r.od3}</td>
+              <td class="right mono">${r.touched}</td>
+              <td class="right mono">${r.total}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/** =========================
+ * 明細表渲染
+ * ========================= */
+function renderTableAndBadges(){
+  const scoped = applyScope(LEADS);
+  const filtered = applyFilters(scoped);
+
+  $("tableBadge").textContent = `顯示 ${filtered.length} 筆（已套用篩選）`;
+
+  const tbody = $("leadTbody");
+  tbody.innerHTML = filtered
+    .sort((a,b)=>{
+      // 先看成交/無效放後，再按 priority 再按逾期
+      const w = (x)=>{
+        if(x.status==="成交") return 9;
+        if(x.status==="無效") return 8;
+        return 1;
+      };
+      const wa = w(a), wb=w(b);
+      if(wa!==wb) return wa-wb;
+
+      const pa = calcPriority(a), pb=calcPriority(b);
+      if(pa!==pb) return pa-pb;
+
+      const oda = a.status==="未撥打"? 999 : (overdueDays(a) ?? -1);
+      const odb = b.status==="未撥打"? 999 : (overdueDays(b) ?? -1);
+      return odb-oda;
+    })
+    .map(l=>{
+      const od = (l.status==="未撥打") ? "—" : overdueDays(l);
+      const odTxt = (l.status==="未撥打") ? "未撥打" : `${od}天`;
+      const odClass = (l.status==="未撥打") ? "bad" : (od>3? "warn":"muted");
+      return `
+        <tr id="row-${l.id}">
+          <td class="mono">${l.id}</td>
+          <td class="mono">${l.customerCode}</td>
+          <td>${l.repName}</td>
+          <td>${l.source}</td>
+          <td><span class="tag ${l.grade}">${l.grade}</span></td>
+          <td class="right mono">${l.fee}</td>
+          <td>${l.contract}</td>
+          <td>${renderStatus(l.status)}</td>
+          <td>${fmtDate(l.lastCall)}</td>
+          <td class="right mono ${odClass}">${odTxt}</td>
+          <td class="right mono">${l.callCount}</td>
+          <td class="right mono">${l.revenue? "$"+money(l.revenue):"—"}</td>
+          <td>
+            <div class="muted" style="font-size:12px">${l.nextStep || "—"}</div>
+            <div class="muted" style="font-size:12px">${l.note || ""}</div>
+          </td>
+          <td class="actions">
+            <button class="smallbtn primary" onclick="markCalled('${l.id}')">標記已撥打</button>
+            <button class="smallbtn ok" onclick="markDeal('${l.id}')">標記成交</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+}
+
+function renderStatus(s){
+  if(s==="成交") return `<span class="ok">成交</span>`;
+  if(s==="無效") return `<span class="bad">無效</span>`;
+  if(s==="跟進中") return `<span class="warn">跟進中</span>`;
+  if(s==="已撥打") return `<span class="muted">已撥打</span>`;
+  return `<span class="bad">未撥打</span>`;
+}
+
+// 操作：模擬更新（前端）
+function markCalled(id){
+  const lead = LEADS.find(x=>x.id===id);
+  if(!lead) return;
+  lead.status = (lead.status==="未撥打") ? "已撥打" : lead.status;
+  lead.lastCall = new Date(TODAY).toISOString();
+  lead.callCount = Math.max(lead.callCount||0, 0) + 1;
+  // 重新計算：等級不變（等級依資料條件），營收只在成交
+  lead.revenue = calcRevenue(lead);
+  render();
+}
+function markDeal(id){
+  const lead = LEADS.find(x=>x.id===id);
+  if(!lead) return;
+  lead.status = "成交";
+  lead.lastCall = lead.lastCall || new Date(TODAY).toISOString();
+  lead.callCount = Math.max(lead.callCount||0, 0) + 1;
+  lead.revenue = calcRevenue(lead);
+  render();
+}
+function scrollToLead(id){
+  const row = document.getElementById("row-"+id);
+  if(row) row.scrollIntoView({behavior:"smooth", block:"center"});
+  row?.classList.add("pulse");
+  setTimeout(()=>row?.classList.remove("pulse"), 600);
+}
+
+// 讓外部 onclick 可用
+window.markCalled = markCalled;
+window.markDeal = markDeal;
+window.scrollToLead = scrollToLead;
+
+/** =========================
+ * 主渲染
+ * ========================= */
+function render(){
+  // 角色切換時：維持篩選器（grade/source/status/q）但 scope 不同
+  // 同步 UI
+  $("roleSel").value = state.role;
+  $("repSel").value = state.repId;
+
+  renderKPI();
+  renderLeftRight();
+  renderRank();
+  renderTableAndBadges();
+
+  $("tableTitle").textContent = (state.role==="sales")
+    ? "名單明細表（個人範圍，可搜尋 / 可篩選 / 可下鑽）"
+    : "名單明細表（全隊範圍，可搜尋 / 可篩選 / 可下鑽）";
+}
+
+setUpdatedAt();
+initControls();
+render();
+</script>
+</body>
+</html>
+
